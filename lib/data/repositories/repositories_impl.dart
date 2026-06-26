@@ -182,6 +182,7 @@ class VaccinationRepositoryImpl implements VaccinationRepository {
         final syncedRecord = localRecord.copyWith(
           imageUrl: finalUrl.isNotEmpty ? finalUrl : localRecord.imageUrl,
           isSynced: true,
+          localImagePath: null, // Clear local path since it's now synced online
         );
         final result = await _remoteDS.saveVaccinationRecord(syncedRecord);
 
@@ -212,7 +213,10 @@ class VaccinationRepositoryImpl implements VaccinationRepository {
           finalUrl = await _remoteDS.uploadImage(record.localImagePath!);
         }
         
-        final updatedRecord = record.copyWith(imageUrl: finalUrl);
+        final updatedRecord = record.copyWith(
+          imageUrl: finalUrl,
+          localImagePath: null, // Clear local path since it's now synced/updated online!
+        );
         final result = await _remoteDS.updateVaccinationRecord(updatedRecord);
         await _localDS.saveVaccinationRecord(result);
         return result;

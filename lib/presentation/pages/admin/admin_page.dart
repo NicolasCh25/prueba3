@@ -36,6 +36,10 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     final nameController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
+    // Fetch already registered sectors to prevent duplicate names locally
+    final vacState = context.read<VaccinationBloc>().state;
+    final List<Sector> allSectors = vacState is VaccinationLoadSuccess ? vacState.allRawSectors : [];
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -53,6 +57,10 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'El nombre es obligatorio';
+              }
+              final cleanVal = value.trim().toLowerCase();
+              if (allSectors.any((s) => s.nombre.toLowerCase() == cleanVal)) {
+                return 'Este sector ya está registrado';
               }
               return null;
             },
@@ -96,6 +104,10 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
         ? UserRole.brigadeCoordinator
         : UserRole.vaccinator;
 
+    // Fetch already registered users from AuthBloc state to prevent duplicate emails/cedulas locally
+    final authState = context.read<AuthBloc>().state;
+    final List<AppUser> allUsers = authState is UsersLoadSuccess ? authState.users : [];
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -124,6 +136,10 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) return 'Requerido';
                     if (val.trim().length < 10) return 'Mínimo 10 dígitos';
+                    final cleanVal = val.trim();
+                    if (allUsers.any((u) => u.cedula == cleanVal)) {
+                      return 'Esta cédula ya está registrada';
+                    }
                     return null;
                   },
                 ),
@@ -160,6 +176,10 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) {
                       return 'Ingrese un correo válido';
                     }
+                    final cleanVal = val.trim().toLowerCase();
+                    if (allUsers.any((u) => u.email.toLowerCase() == cleanVal)) {
+                      return 'Este correo ya está registrado';
+                    }
                     return null;
                   },
                 ),
@@ -187,12 +207,6 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
                       ),
                 );
                 Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Usuario creado de forma exitosa. Rol: ${roleToCreate.displayName}'),
-                    backgroundColor: AppColors.success,
-                  ),
-                );
               }
             },
             child: const Text('Guardar', style: TextStyle(fontSize: 14)),
@@ -324,68 +338,84 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<VaccinationBloc, VaccinationState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is VaccinationOperationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: AppColors.success),
-          );
-        } else if (state is VaccinationError) {
+        if (state is AuthActionFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: AppColors.error),
           );
+        } else if (state is UserCreationSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Usuario creado de forma exitosa.'),
+              backgroundColor: AppColors.success,
+            ),
+          );
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Panel de Administración'),
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorColor: AppColors.primary,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textSecondary,
-            tabs: const [
-              Tab(icon: Icon(Icons.map_rounded), text: 'Sectores'),
-              Tab(icon: Icon(Icons.people_alt_rounded), text: 'Usuarios'),
-            ],
-          ),
-        ),
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.background, Color(0xFF13132B)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+      child: BlocListener<VaccinationBloc, VaccinationState>(
+        listener: (context, state) {
+          if (state is VaccinationOperationSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: AppColors.success),
+            );
+          } else if (state is VaccinationError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: AppColors.error),
+            );
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Panel de Administración'),
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorColor: AppColors.primary,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textSecondary,
+              tabs: const [
+                Tab(icon: Icon(Icons.map_rounded), text: 'Sectores'),
+                Tab(icon: Icon(Icons.people_alt_rounded), text: 'Usuarios'),
+              ],
             ),
           ),
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildSectorsTab(),
-              _buildUsersTab(),
-            ],
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.background, Color(0xFF13132B)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildSectorsTab(),
+                _buildUsersTab(),
+              ],
+            ),
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (_tabController.index == 0) {
-              if (widget.currentUser.role == UserRole.campaignCoordinator) {
-                _showCreateSectorDialog();
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              if (_tabController.index == 0) {
+                if (widget.currentUser.role == UserRole.campaignCoordinator) {
+                  _showCreateSectorDialog();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Solo el Coordinador de Campaña puede crear nuevos sectores.'),
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
+                }
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Solo el Coordinador de Campaña puede crear nuevos sectores.'),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+                _showCreateUserDialog();
               }
-            } else {
-              _showCreateUserDialog();
-            }
-          },
-          child: const Icon(Icons.add, color: Colors.white),
+            },
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
         ),
       ),
     );
@@ -501,7 +531,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
   Widget _buildUsersTab() {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        if (state is AuthLoading) {
+        if (state is AuthLoading || state is AuthOperationInProgress) {
           return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
 

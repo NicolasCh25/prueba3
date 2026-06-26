@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../domain/entities/entities.dart';
 
@@ -287,18 +289,28 @@ class SupabaseService {
     required UserRole role,
   }) async {
     if (isRealSupabase) {
-      // Create user inside auth via Supabase functions (or admin API depending on config)
-      // Standard profiles insertion for simplicity
-      final response = await _client!.from('profiles').insert({
-        'cedula': cedula,
-        'nombres': nombres,
-        'apellidos': apellidos,
-        'telefono': telefono,
-        'email': email,
-        'role': role.toJson(),
-        'is_first_login': true,
-      }).select().single();
-      return AppUser.fromMap(response);
+      try {
+        final response = await _client!.functions.invoke(
+          'create-user',
+          body: {
+            'cedula': cedula,
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'telefono': telefono,
+            'email': email,
+            'role': role.toJson(),
+          },
+        );
+
+        if (response.status != 200) {
+          final errorMsg = response.data is Map ? response.data['error'] : 'Error del servidor al crear usuario.';
+          throw Exception(errorMsg);
+        }
+
+        return AppUser.fromMap(response.data as Map<String, dynamic>);
+      } catch (e) {
+        throw Exception(e.toString().replaceAll('Exception: ', ''));
+      }
     } else {
       await Future.delayed(const Duration(milliseconds: 600));
       if (_mockUsers.values.any((u) => u.cedula == cedula || u.email == email)) {
@@ -328,16 +340,20 @@ class SupabaseService {
       await Future.delayed(const Duration(milliseconds: 400));
       return List.from(_mockVaccinations);
     }
-  }
-
-  Future<String> uploadImage(String filePath) async {
+  }  Future<String> uploadImage(String filePath) async {
     if (filePath.isEmpty) return '';
-    final file = File(filePath);
-    if (!await file.exists()) return '';
 
     if (isRealSupabase) {
       final fileName = 'pet_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      await _client!.storage.from('pet-images').upload(fileName, file);
+      if (kIsWeb) {
+        final xfile = XFile(filePath);
+        final bytes = await xfile.readAsBytes();
+        await _client!.storage.from('pet-images').uploadBinary(fileName, bytes);
+      } else {
+        final file = File(filePath);
+        if (!await file.exists()) return '';
+        await _client!.storage.from('pet-images').upload(fileName, file);
+      }
       final String publicUrl = _client!.storage.from('pet-images').getPublicUrl(fileName);
       return publicUrl;
     } else {
@@ -348,7 +364,6 @@ class SupabaseService {
           : 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500';
     }
   }
-
   Future<VaccinationRecord> saveVaccinationRecord(VaccinationRecord record) async {
     if (isRealSupabase) {
       final response = await _client!.from('vaccinations').insert(

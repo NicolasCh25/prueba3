@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -41,6 +42,8 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
 
   // Camera & GPS State
   String? _localImagePath;
+  Uint8List? _webImageBytes;
+  bool _hasNewImageSelected = false;
   double _latitude = 0.0;
   double _longitude = 0.0;
   bool _loadingLocation = false;
@@ -151,9 +154,19 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
       );
 
       if (image != null) {
-        setState(() {
-          _localImagePath = image.path;
-        });
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          setState(() {
+            _webImageBytes = bytes;
+            _localImagePath = image.path;
+            _hasNewImageSelected = true;
+          });
+        } else {
+          setState(() {
+            _localImagePath = image.path;
+            _hasNewImageSelected = true;
+          });
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,7 +217,9 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
         vaccineName: _selectedVaccine,
         observations: _observationsController.text.trim(),
         imageUrl: widget.existingRecord?.imageUrl ?? '',
-        localImagePath: _localImagePath,
+        localImagePath: _hasNewImageSelected 
+            ? _localImagePath 
+            : (widget.existingRecord?.isSynced == true ? null : _localImagePath),
         latitude: _latitude,
         longitude: _longitude,
         createdAt: createdAt,
@@ -485,8 +500,48 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
   // --- FIELD PARTS HELPERS ---
 
   Widget _buildPhotoSection() {
-    final hasImage = _localImagePath != null || widget.existingRecord?.imageUrl != null;
     final String? remoteUrl = widget.existingRecord?.imageUrl;
+    final hasRemoteUrl = remoteUrl != null && remoteUrl.isNotEmpty;
+    
+    Widget? imageWidget;
+
+    if (_hasNewImageSelected) {
+      if (kIsWeb) {
+        if (_webImageBytes != null) {
+          imageWidget = Image.memory(
+            _webImageBytes!,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+          );
+        }
+      } else if (_localImagePath != null) {
+        imageWidget = Image.file(
+          File(_localImagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+        );
+      }
+    } else if (hasRemoteUrl) {
+      imageWidget = Image.network(
+        remoteUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+      );
+    } else if (_localImagePath != null) {
+      if (kIsWeb) {
+        imageWidget = Image.network(
+          _localImagePath!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+        );
+      } else {
+        imageWidget = Image.file(
+          File(_localImagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+        );
+      }
+    }
 
     return Center(
       child: Stack(
@@ -501,22 +556,11 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
               border: Border.all(color: AppColors.primary, width: 2),
             ),
             child: ClipOval(
-              child: hasImage
-                  ? (_localImagePath != null
-                      ? Image.file(
-                          File(_localImagePath!),
-                          fit: BoxFit.cover,
-                        )
-                      : Image.network(
-                          remoteUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
-                        ))
-                  : const Icon(
-                      Icons.camera_alt_outlined,
-                      size: 40,
-                      color: AppColors.textSecondary,
-                    ),
+              child: imageWidget ?? const Icon(
+                Icons.camera_alt_outlined,
+                size: 40,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           FloatingActionButton.small(

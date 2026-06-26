@@ -107,7 +107,7 @@ BEGIN
     )
     VALUES (
         NEW.id,
-        NEW.email,
+        LOWER(NEW.email),
         crypt('Ecuador2026', gen_salt('bf', 10)),
         now(),
         '{"provider":"email","providers":["email"]}'::jsonb,
@@ -116,7 +116,6 @@ BEGIN
         'authenticated'
     );
     
-    -- 2. Insertar en auth.identities para registrar la identidad en GoTrue
     INSERT INTO auth.identities (
         id,
         user_id,
@@ -128,11 +127,11 @@ BEGIN
         updated_at
     )
     VALUES (
-        NEW.id::text,
         NEW.id,
-        json_build_object('sub', NEW.id::text, 'email', NEW.email)::jsonb,
+        NEW.id,
+        json_build_object('sub', NEW.id::text, 'email', LOWER(NEW.email))::jsonb,
         'email',
-        NEW.id::text,
+        LOWER(NEW.email),
         now(),
         now(),
         now()

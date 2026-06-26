@@ -93,11 +93,26 @@ class AuthError extends AuthState {
   List<Object?> get props => [message];
 }
 
-class UsersLoadSuccess extends AuthState {
+class UsersLoadSuccess extends Authenticated {
   final List<AppUser> users;
-  const UsersLoadSuccess(this.users);
+  const UsersLoadSuccess(this.users, AppUser currentUser) : super(currentUser);
   @override
-  List<Object?> get props => [users];
+  List<Object?> get props => [users, user];
+}
+
+class AuthOperationInProgress extends Authenticated {
+  const AuthOperationInProgress(AppUser currentUser) : super(currentUser);
+}
+
+class UserCreationSuccess extends Authenticated {
+  const UserCreationSuccess(AppUser currentUser) : super(currentUser);
+}
+
+class AuthActionFailure extends Authenticated {
+  final String message;
+  const AuthActionFailure(this.message, AppUser currentUser) : super(currentUser);
+  @override
+  List<Object?> get props => [message, user];
 }
 
 // --- BLOC ---
@@ -183,39 +198,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onCreateUser(CreateUserRequested event, Emitter<AuthState> emit) async {
-    // Keep reference to current state
     final currentState = state;
-    emit(AuthLoading());
-    try {
-      await authRepository.createUser(
-        cedula: event.cedula,
-        nombres: event.nombres,
-        apellidos: event.apellidos,
-        telefono: event.telefono,
-        email: event.email,
-        role: event.role,
-      );
-      // Restore previous state or reload user list if possible
-      if (currentState is UsersLoadSuccess) {
-        add(LoadUsersRequested());
-      } else {
+    if (currentState is Authenticated) {
+      final currentUser = currentState.user;
+      emit(AuthOperationInProgress(currentUser));
+      try {
+        await authRepository.createUser(
+          cedula: event.cedula,
+          nombres: event.nombres,
+          apellidos: event.apellidos,
+          telefono: event.telefono,
+          email: event.email,
+          role: event.role,
+        );
+        emit(UserCreationSuccess(currentUser));
+        // Restore previous state or reload user list if possible
+        if (currentState is UsersLoadSuccess) {
+          add(LoadUsersRequested());
+        } else {
+          emit(currentState);
+        }
+      } catch (e) {
+        emit(AuthActionFailure('Error al crear usuario: ${e.toString().replaceAll('Exception: ', '')}', currentUser));
         emit(currentState);
       }
-    } catch (e) {
-      emit(AuthError('Error al crear usuario: ${e.toString().replaceAll('Exception: ', '')}'));
-      emit(currentState);
     }
   }
 
   Future<void> _onLoadUsers(LoadUsersRequested event, Emitter<AuthState> emit) async {
     final currentState = state;
-    emit(AuthLoading());
-    try {
-      final users = await authRepository.getUsers();
-      emit(UsersLoadSuccess(users));
-    } catch (e) {
-      emit(AuthError('Error al cargar usuarios: $e'));
-      emit(currentState);
+    if (currentState is Authenticated) {
+      final currentUser = currentState.user;
+      emit(AuthOperationInProgress(currentUser));
+      try {
+        final users = await authRepository.getUsers();
+        emit(UsersLoadSuccess(users, currentUser));
+      } catch (e) {
+        emit(AuthActionFailure('Error al cargar usuarios: $e', currentUser));
+        emit(currentState);
+      }
     }
   }
 }

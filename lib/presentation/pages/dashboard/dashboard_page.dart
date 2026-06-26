@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_theme.dart';
@@ -46,7 +48,9 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ],
         ),
-        content: SingleChildScrollView(
+        content: SizedBox(
+          width: 400,
+          child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,19 +71,47 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
                 )
-              else if (record.localImagePath != null)
+              else if (record.localImagePath != null && record.localImagePath!.isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    record.localImagePath!,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 120,
-                      color: AppColors.surfaceLight,
-                      child: const Icon(Icons.broken_image, size: 40),
-                    ),
+                  child: Builder(
+                    builder: (context) {
+                      final path = record.localImagePath!;
+                      if (kIsWeb) {
+                        if (path.startsWith('blob:') || path.startsWith('http://') || path.startsWith('https://')) {
+                          return Image.network(
+                            path,
+                            height: 180,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 120,
+                              color: AppColors.surfaceLight,
+                              child: const Icon(Icons.broken_image, size: 40),
+                            ),
+                          );
+                        } else {
+                          return Container(
+                            height: 120,
+                            color: AppColors.surfaceLight,
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.broken_image, size: 40),
+                          );
+                        }
+                      } else {
+                        return Image.file(
+                          File(path),
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            height: 120,
+                            color: AppColors.surfaceLight,
+                            child: const Icon(Icons.broken_image, size: 40),
+                          ),
+                        );
+                      }
+                    },
                   ),
                 ),
               const SizedBox(height: 16),
@@ -96,9 +128,12 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
         ),
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              Navigator.of(ctx, rootNavigator: true).pop();
+            },
             child: const Text('Cerrar', style: TextStyle(color: AppColors.textSecondary)),
           ),
           if (canEdit)
@@ -108,7 +143,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 minimumSize: const Size(110, 40),
               ),
               onPressed: () {
-                Navigator.pop(ctx);
+                Navigator.of(ctx, rootNavigator: true).pop();
                 _openEditForm(record);
               },
               icon: const Icon(Icons.edit, size: 16),
@@ -163,19 +198,42 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SyncBloc, SyncState>(
-      listener: (context, state) {
-        if (state.syncMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.syncMessage!),
-              backgroundColor: state.syncMessage!.contains('Error') ? AppColors.error : AppColors.success,
-            ),
-          );
-          // Reload data after sync completes
-          context.read<VaccinationBloc>().add(LoadVaccinationsAndSectors(widget.user));
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SyncBloc, SyncState>(
+          listener: (context, state) {
+            if (state.syncMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.syncMessage!),
+                  backgroundColor: state.syncMessage!.contains('Error') ? AppColors.error : AppColors.success,
+                ),
+              );
+              // Reload data after sync completes
+              context.read<VaccinationBloc>().add(LoadVaccinationsAndSectors(widget.user));
+            }
+          },
+        ),
+        BlocListener<VaccinationBloc, VaccinationState>(
+          listener: (context, state) {
+            if (state is VaccinationOperationSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+            } else if (state is VaccinationError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         body: Container(
           width: double.infinity,
@@ -309,7 +367,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       builder: (context) => AdminPage(currentUser: widget.user),
                     ),
                   ).then((_) {
-                    context.read<VaccinationBloc>().add(LoadVaccinationsAndSectors(widget.user));
+                    if (context.mounted) {
+                      context.read<VaccinationBloc>().add(LoadVaccinationsAndSectors(widget.user));
+                    }
                   });
                 },
               ),
