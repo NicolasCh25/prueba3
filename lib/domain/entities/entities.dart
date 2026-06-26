@@ -119,7 +119,7 @@ class Sector {
     return Sector(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
-      coordinadorBrigadaId: clearCoor ? null : (coorId ?? this.coordinadorBrigadaId),
+      coordinadorBrigadaId: clearCoor ? null : (coorId ?? coordinadorBrigadaId),
       vaccinatorIds: vaccinatorIds ?? this.vaccinatorIds,
     );
   }

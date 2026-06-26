@@ -10,8 +10,8 @@ class SupabaseService {
   bool get isRealSupabase => _client != null;
 
   // Configuration for real Supabase
-  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: '');
-  static const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
+  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://edlxgqjfwkjwndewicwu.supabase.co');
+  static const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkbHhncWpmd2tqd25kZXdpY3d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjY2NDAsImV4cCI6MjA5ODAwMjY0MH0.ih_MQUCaFIvULg-acnWp6byg-I_EMiPaKFNxP22YouU');
 
   // Simulator state (for demo/development fallback)
   final Map<String, AppUser> _mockUsers = {};

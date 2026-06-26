@@ -41,13 +41,13 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         onBackground: AppColors.textPrimary,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: AppColors.surfaceLight.withOpacity(0.4),
+            color: AppColors.surfaceLight.withValues(alpha: 0.4),
             width: 1,
           ),
         ),
