@@ -28,6 +28,9 @@ class _DashboardPageState extends State<DashboardPage> {
     // Load initial data
     context.read<VaccinationBloc>().add(LoadVaccinationsAndSectors(widget.user));
     context.read<SyncBloc>().add(InitializeSync());
+    if (widget.user.role != UserRole.vaccinator) {
+      context.read<AuthBloc>().add(LoadUsersRequested());
+    }
   }
 
   void _showRecordDetails(VaccinationRecord record, bool canEdit) {
@@ -489,6 +492,10 @@ class _DashboardPageState extends State<DashboardPage> {
     final cats = records.where((r) => r.petType == 'cat').length;
     final unsynced = records.where((r) => !r.isSynced).length;
 
+    final dogPct = total == 0 ? 0.0 : dogs / total;
+    final catPct = total == 0 ? 0.0 : cats / total;
+    final syncPct = total == 0 ? 1.0 : (total - unsynced) / total;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -497,56 +504,94 @@ class _DashboardPageState extends State<DashboardPage> {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.5,
-          children: [
-            _buildMetricCard('Total Vacunados', '$total', Icons.analytics_rounded, AppColors.primary),
-            _buildMetricCard('Perros', '$dogs', Icons.pets, AppColors.info),
-            _buildMetricCard('Gatos', '$cats', Icons.pets_outlined, AppColors.secondary),
-            _buildMetricCard('Locales sin Subir', '$unsynced', Icons.cloud_upload_rounded, AppColors.accent),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final int crossAxisCount = constraints.maxWidth > 800 ? 4 : 2;
+            final double aspectRatio = constraints.maxWidth > 800 ? 2.3 : 1.6;
+            return GridView.count(
+              crossAxisCount: crossAxisCount,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: aspectRatio,
+              children: [
+                _buildMetricCard('Total Vacunados', '$total', Icons.analytics_rounded, AppColors.primary, 1.0),
+                _buildMetricCard('Perros', '$dogs', Icons.pets, AppColors.info, dogPct),
+                _buildMetricCard('Gatos', '$cats', Icons.pets_outlined, AppColors.secondary, catPct),
+                _buildMetricCard('Locales sin Subir', '$unsynced', Icons.cloud_upload_rounded, AppColors.accent, syncPct),
+              ],
+            );
+          },
         ),
       ],
     );
   }
 
-  Widget _buildMetricCard(String title, String val, IconData icon, Color color) {
+  Widget _buildMetricCard(String title, String val, IconData icon, Color color, double percentage) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.surfaceLight.withOpacity(0.3),
-          width: 1,
+          color: color.withOpacity(0.2),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 12, 
+                    color: AppColors.textSecondary, 
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  val,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Stack(
+            alignment: Alignment.center,
             children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: CircularProgressIndicator(
+                  value: percentage,
+                  strokeWidth: 4.5,
+                  backgroundColor: AppColors.surfaceLight.withOpacity(0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                ),
               ),
               Icon(icon, color: color, size: 20),
             ],
-          ),
-          Text(
-            val,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
           ),
         ],
       ),
@@ -570,50 +615,127 @@ class _DashboardPageState extends State<DashboardPage> {
       vaccinatorCounts[r.createdBy] = (vaccinatorCounts[r.createdBy] ?? 0) + 1;
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: AppTheme.glassCardDecoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Desglose por Sectores',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 12),
-          if (sectorCounts.isEmpty)
-            const Text('Sin datos disponibles', style: TextStyle(fontSize: 13, color: AppColors.textMuted))
-          else
-            ...sectorCounts.entries.map((e) {
-              final pct = records.isEmpty ? 0.0 : e.value / records.length;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final List<AppUser> allUsers = authState is UsersLoadSuccess ? authState.users : [];
+        final userNames = {for (var u in allUsers) u.id: '${u.nombres} ${u.apellidos}'};
+
+        final sectorCard = Container(
+          padding: const EdgeInsets.all(16),
+          decoration: AppTheme.glassCardDecoration,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Vacunaciones por Sector',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 12),
+              if (sectorCounts.isEmpty)
+                const Text('Sin datos disponibles', style: TextStyle(fontSize: 13, color: AppColors.textMuted))
+              else
+                ...sectorCounts.entries.map((e) {
+                  final pct = records.isEmpty ? 0.0 : e.value / records.length;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Column(
                       children: [
-                        Text(e.key, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
-                        Text('${e.value} (${(pct * 100).toStringAsFixed(0)}%)',
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(e.key, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                            Text('${e.value} (${(pct * 100).toStringAsFixed(0)}%)',
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: pct,
+                            color: AppColors.primary,
+                            backgroundColor: AppColors.surfaceLight,
+                            minHeight: 6,
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: pct,
-                        color: AppColors.primary,
-                        backgroundColor: AppColors.surfaceLight,
-                        minHeight: 6,
-                      ),
+                  );
+                }).toList(),
+            ],
+          ),
+        );
+
+        final vaccinatorCard = Container(
+          padding: const EdgeInsets.all(16),
+          decoration: AppTheme.glassCardDecoration,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Vacunaciones por Vacunador',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 12),
+              if (vaccinatorCounts.isEmpty)
+                const Text('Sin datos disponibles', style: TextStyle(fontSize: 13, color: AppColors.textMuted))
+              else
+                ...vaccinatorCounts.entries.map((e) {
+                  final pct = records.isEmpty ? 0.0 : e.value / records.length;
+                  final String vName = userNames[e.key] ?? e.key;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(vName, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                            Text('${e.value} (${(pct * 100).toStringAsFixed(0)}%)',
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: pct,
+                            color: AppColors.primary,
+                            backgroundColor: AppColors.surfaceLight,
+                            minHeight: 6,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                }).toList(),
+            ],
+          ),
+        );
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 800) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: sectorCard),
+                  const SizedBox(width: 16),
+                  Expanded(child: vaccinatorCard),
+                ],
               );
-            }).toList(),
-        ],
-      ),
+            } else {
+              return Column(
+                children: [
+                  sectorCard,
+                  const SizedBox(height: 16),
+                  vaccinatorCard,
+                ],
+              );
+            }
+          },
+        );
+      },
     );
   }
 
