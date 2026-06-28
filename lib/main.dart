@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           title: 'Campaña de Vacunación Canina & Felina',
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
           home: const AppRootNavigator(),
         ),

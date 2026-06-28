@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: const Color.fromARGB(255, 216, 212, 212),
         title: const Text(
           'Recuperar Contraseña',
           style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
@@ -112,6 +112,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Sin Container propio de fondo: el color de fondo lo controla
+    // AppTheme.lightTheme -> scaffoldBackgroundColor, igual en todas las pantallas.
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -129,181 +131,170 @@ class _LoginPageState extends State<LoginPage> {
             );
           }
         },
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.background, Color(0xFF1E1E38)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo / Icon header
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [AppColors.primary, AppColors.secondary],
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo / Icon header
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primary, AppColors.secondary],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          )
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.pets,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Campaña de Vacunación',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const Text(
+                      'Canina y Felina - Ecuador 2026',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: AppColors.primaryDark,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                    // Glassmorphic Card
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: AppTheme.glassCardDecoration,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Iniciar Sesión',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            )
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.pets,
-                          size: 40,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Campaña de Vacunación',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const Text(
-                        'Canina y Felina - Ecuador 2026',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 36),
-                      // Glassmorphic Card
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: AppTheme.glassCardDecoration,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Iniciar Sesión',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(color: AppColors.textPrimary),
+                            decoration: const InputDecoration(
+                              labelText: 'Correo Electrónico',
+                              prefixIcon: Icon(Icons.email_outlined, color: AppColors.textSecondary),
                             ),
-                            const SizedBox(height: 20),
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              style: const TextStyle(color: AppColors.textPrimary),
-                              decoration: const InputDecoration(
-                                labelText: 'Correo Electrónico',
-                                prefixIcon: Icon(Icons.email_outlined, color: AppColors.textSecondary),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Ingrese su correo electrónico';
-                                }
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                  return 'Ingrese un correo válido';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _passwordController,
-                              obscureText: _obscurePassword,
-                              style: const TextStyle(color: AppColors.textPrimary),
-                              decoration: InputDecoration(
-                                labelText: 'Contraseña',
-                                prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  },
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Ingrese su correo electrónico';
+                              }
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                return 'Ingrese un correo válido';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            style: const TextStyle(color: AppColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Contraseña',
+                              prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  color: AppColors.textSecondary,
                                 ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Ingrese su contraseña';
-                                }
-                                return null;
-                              },
                             ),
-                            const SizedBox(height: 12),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: _showRecoveryDialog,
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: const Size(0, 0),
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: const Text(
-                                  '¿Olvidaste tu contraseña?',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Ingrese su contraseña';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _showRecoveryDialog,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                '¿Olvidaste tu contraseña?',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 24),
-                            BlocBuilder<AuthBloc, AuthState>(
-                              builder: (context, state) {
-                                final isLoading = state is AuthLoading;
-                                return ElevatedButton(
-                                  onPressed: isLoading ? null : _submitLogin,
-                                  child: isLoading
-                                      ? const SizedBox(
-                                          height: 24,
-                                          width: 24,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        )
-                                      : const Text('ACCEDER AL SISTEMA'),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 24),
+                          BlocBuilder<AuthBloc, AuthState>(
+                            builder: (context, state) {
+                              final isLoading = state is AuthLoading;
+                              return ElevatedButton(
+                                onPressed: isLoading ? null : _submitLogin,
+                                child: isLoading
+                                    ? const SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        ),
+                                      )
+                                    : const Text('ACCEDER AL SISTEMA'),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 32),
-                      const Text(
-                        'Ministerio de Salud Pública - Gobierno del Ecuador',
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 12,
-                          letterSpacing: 0.2,
-                        ),
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Ministerio de Salud Pública - Gobierno del Ecuador',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 12,
+                        letterSpacing: 0.2,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
