@@ -42,12 +42,15 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Icon(
               record.petType == 'dog' ? Icons.pets : Icons.pets_outlined,
-              color: AppColors.primary,
+              color: AppColors.primaryDark,
             ),
             const SizedBox(width: 8),
-            Text(
-              'Mascota: ${record.petName}',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            Expanded(
+              child: Text(
+                'Mascota: ${record.petName}',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -176,7 +179,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     value,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isSynced ? AppColors.success : AppColors.accent,
+                      color: isSynced ? AppColors.textSuccess : AppColors.textWarning,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -243,7 +246,7 @@ class _DashboardPageState extends State<DashboardPage> {
           height: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.background, Color(0xFF13132B)],
+              colors: [AppColors.background, Color(0xFFE5E9F4)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -351,7 +354,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
+                  color: AppColors.primaryDark,
                 ),
               ),
             ),
@@ -409,7 +412,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   Icon(
                     state.isOnline ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
-                    color: state.isOnline ? AppColors.success : AppColors.error,
+                    color: state.isOnline ? AppColors.textSuccess : AppColors.textError,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -418,7 +421,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: state.isOnline ? AppColors.success : AppColors.error,
+                      color: state.isOnline ? AppColors.textSuccess : AppColors.textError,
                     ),
                   ),
                 ],
@@ -645,7 +648,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           children: [
                             Text(e.key, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
                             Text('${e.value} (${(pct * 100).toStringAsFixed(0)}%)',
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -692,7 +695,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           children: [
                             Text(vName, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
                             Text('${e.value} (${(pct * 100).toStringAsFixed(0)}%)',
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -746,9 +749,12 @@ class _DashboardPageState extends State<DashboardPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Registros de Vacunación',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            const Expanded(
+              child: Text(
+                'Registros de Vacunación',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             // Filter dropdown
             BlocBuilder<VaccinationBloc, VaccinationState>(
@@ -898,7 +904,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           const SizedBox(height: 4),
                           Text('Dueño: ${record.ownerName}', style: const TextStyle(fontSize: 13)),
                           Text('Sector: $sName', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          Text('Vacuna: ${record.vaccineName}', style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w500)),
+                          Text('Vacuna: ${record.vaccineName}', style: const TextStyle(fontSize: 12, color: AppColors.primaryDark, fontWeight: FontWeight.w500)),
                         ],
                       ),
                       trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),

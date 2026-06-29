@@ -62,7 +62,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           height: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.background, Color(0xFF1E1E38)],
+              colors: [AppColors.background, Color(0xFFE5E9F4)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),

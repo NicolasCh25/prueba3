@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 216, 212, 212),
+        backgroundColor: AppColors.background,
         title: const Text(
           'Recuperar Contraseña',
           style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),

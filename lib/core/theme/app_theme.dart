@@ -1,32 +1,38 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Fondo claro
-  static const Color background = Color.fromARGB(255, 79, 139, 92); // blanco con un toque lavanda
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceLight = Color(0xFFF1ECFB);
+  // Fondo claro amigable
+  static const Color background = Color(0xFFF5F6FA); // Blanco con un sutil toque lavanda
+  static const Color surface = Color(0xFFFFFFFF); // Blanco puro para tarjetas
+  static const Color surfaceLight = Color(0xFFEBEEF5); // Lavanda grisáceo muy suave para bordes y campos inactivos
 
-  // Acentos pastel (versión suave de cada color)
-  static const Color primary = Color(0xFF7DD8C6); // Mint/teal pastel
-  static const Color primaryDark = Color(0xFF4FBBA6);
-  static const Color secondary = Color(0xFFA5A8F2); // Lavanda/indigo pastel
-  static const Color accent = Color(0xFFFFD08A); // Durazno/amber pastel
+  // Acentos pastel
+  static const Color primary = Color(0xFF98DDCA); // Menta pastel
+  static const Color primaryDark = Color(0xFF25755E); // Verde menta oscuro para excelente contraste en textos y títulos
+  static const Color secondary = Color(0xFFD5AAFF); // Lavanda/Lila pastel
+  static const Color accent = Color(0xFFFFD3B6); // Durazno/Melocotón pastel
 
-  // Extra pops de color pastel
-  static const Color pink = Color(0xFFFFB3C6); // Rosa pastel
-  static const Color purple = Color(0xFFD8B4FE); // Lila pastel
-  static const Color cyan = Color(0xFFA7E8F0); // Celeste pastel
-  static const Color lime = Color(0xFFD3F09A); // Verde lima pastel
+  // Pops de color pastel
+  static const Color pink = Color(0xFFFFAAA5); // Rosa pastel
+  static const Color purple = Color(0xFFE8AEFF); // Lila claro
+  static const Color cyan = Color(0xFFA8DADC); // Celeste pastel
+  static const Color lime = Color(0xFFE2F0CB); // Verde lima suave
 
-  // Statuses (también en tono pastel)
-  static const Color success = Color(0xFF9AE6B4);
-  static const Color error = Color(0xFFFFA6A6);
-  static const Color info = Color(0xFFA7E8F0);
+  // Estados en tonos pastel legibles (para fondos)
+  static const Color success = Color(0xFFC7F9CC); // Verde éxito suave
+  static const Color error = Color(0xFFFFB5A7); // Coral suave para errores
+  static const Color info = Color(0xFFA8DADC); // Celeste info
 
-  // Text — oscuro para que sea legible sobre fondo claro
-  static const Color textPrimary = Color(0xFF2D2A3D);
-  static const Color textSecondary = Color(0xFF6B6580);
-  static const Color textMuted = Color(0xFFA39DB8);
+  // Textos e Iconos de estado (oscuros para legibilidad sobre fondos pastel)
+  static const Color textSuccess = Color(0xFF1E5E43); // Verde oscuro para texto/iconos de éxito
+  static const Color textError = Color(0xFFB03A2E); // Rojo coral oscuro para texto/iconos de error
+  static const Color textInfo = Color(0xFF2E5B82); // Azul oscuro para texto/iconos informativos
+  static const Color textWarning = Color(0xFF8C5B32); // Durazno oscuro/marrón suave para texto de alerta
+
+  // Textos contrastantes y legibles sobre fondos claros
+  static const Color textPrimary = Color(0xFF2C2F44); // Gris oscuro azulado suave
+  static const Color textSecondary = Color(0xFF62667E); // Gris pizarra medio
+  static const Color textMuted = Color(0xFF9499B0); // Gris claro para marcas de agua/inactivos
 }
 
 class AppTheme {
@@ -112,8 +118,8 @@ class AppTheme {
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.pink,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

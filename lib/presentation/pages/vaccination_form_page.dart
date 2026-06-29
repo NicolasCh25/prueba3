@@ -247,7 +247,7 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
         title: Text(isEditing ? 'Editar Registro' : 'Nueva Vacunación'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check, color: AppColors.primary, size: 28),
+            icon: const Icon(Icons.check, color: AppColors.primaryDark, size: 28),
             onPressed: _saveForm,
           ),
         ],
@@ -257,7 +257,7 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.background, Color(0xFF13132B)],
+            colors: [AppColors.background, Color(0xFFE5E9F4)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -644,13 +644,13 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondary),
+            Icon(icon, color: isSelected ? AppColors.primaryDark : AppColors.textSecondary),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
               ),
             ),
           ],
@@ -671,7 +671,7 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
         children: [
           Icon(
             Icons.location_on_rounded,
-            color: _latitude == 0.0 ? AppColors.textMuted : AppColors.primary,
+            color: _latitude == 0.0 ? AppColors.textMuted : AppColors.primaryDark,
             size: 32,
           ),
           const SizedBox(width: 12),
@@ -706,7 +706,7 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.my_location, color: AppColors.primary),
+            icon: const Icon(Icons.my_location, color: AppColors.primaryDark),
             onPressed: _determinePosition,
           ),
         ],
@@ -720,7 +720,7 @@ class _VaccinationFormPageState extends State<VaccinationFormPage> {
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.bold,
-        color: AppColors.primary,
+        color: AppColors.primaryDark,
         letterSpacing: 0.5,
       ),
     );

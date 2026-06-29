@@ -370,8 +370,8 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
             title: const Text('Panel de Administración'),
             bottom: TabBar(
               controller: _tabController,
-              indicatorColor: AppColors.primary,
-              labelColor: AppColors.primary,
+              indicatorColor: AppColors.primaryDark,
+              labelColor: AppColors.primaryDark,
               unselectedLabelColor: AppColors.textSecondary,
               tabs: const [
                 Tab(icon: Icon(Icons.map_rounded), text: 'Sectores'),
@@ -384,7 +384,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
             height: double.infinity,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.background, Color(0xFF13132B)],
+                colors: [AppColors.background, Color(0xFFE5E9F4)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -571,7 +571,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
                         : AppColors.info.withOpacity(0.15),
                     child: Icon(
                       user.role == UserRole.brigadeCoordinator ? Icons.supervised_user_circle : Icons.person,
-                      color: user.role == UserRole.brigadeCoordinator ? AppColors.primary : AppColors.info,
+                      color: user.role == UserRole.brigadeCoordinator ? AppColors.primaryDark : AppColors.textInfo,
                     ),
                   ),
                   title: Text(
