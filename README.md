@@ -40,25 +40,31 @@ El proyecto está organizado siguiendo los principios de la arquitectura limpia 
 
 A continuación se presentan las pantallas principales que componen el flujo de la aplicación:
 
-### 1. Iniciar Sesión (Login)
+### 1. Icono 
+![Icono](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/icono.png)
+
+### 2. Splash Screen
+![Splash Screen](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/splash-screen.png)
+
+### 3. Iniciar Sesión (Login)
 *Fondo pastel claro amigable, soporte para recuperación de contraseña y diseño de campos de texto blandos.*
 
-![Login](https://via.placeholder.com/280x600?text=Pantalla+de+Login)
+![Login](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/loginjpg.jpg)
 
-### 2. Dashboard Principal (Vista de Vacunador / Coordinador)
+### 4. Dashboard Principal (Vista de Vacunador / Coordinador)
 *Métricas rápidas reactivas de dosis aplicadas, barra de estado de sincronización ("Conexión Estable") y listado dinámico de mascotas.*
 
-![Dashboard](https://via.placeholder.com/280x600?text=Dashboard+Principal)
+![Dashboard](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/dashboard.jpg)
 
-### 3. Formulario de Vacunación (Registro de Mascota)
+### 5. Formulario de Vacunación (Registro de Mascota)
 *Formulario intuitivo que incluye selectores visuales de especie (Perro/Gato), captura automática de geolocalización GPS, selección de vacunas específicas por tipo de animal y captura de evidencia fotográfica.*
 
-![Formulario](https://via.placeholder.com/280x600?text=Formulario+de+Vacunacion)
+![Formulario Mascota](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/formulario_mascota.jpg)
 
-### 4. Panel de Administración
+### 6. Panel de Administración
 *Control de sectores geográficos y asignación de coordinadores y vacunadores.*
 
-![Panel de Administracion](https://via.placeholder.com/280x600?text=Panel+de+Administracion)
+![Panel](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/panel.jpg)
 
 ---
 
