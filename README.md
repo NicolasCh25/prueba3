@@ -61,10 +61,21 @@ A continuación se presentan las pantallas principales que componen el flujo de 
 
 ![Formulario Mascota](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/formulario_mascota.jpg)
 
+![Mascota Registrada](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/Capturas_APP_VACUNACION/mascota-registrada.jpg)
+
+![Todas las Mascotas](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/Capturas_APP_VACUNACION/todas-mascotas.jpg)
+
 ### 6. Panel de Administración
 *Control de sectores geográficos y asignación de coordinadores y vacunadores.*
 
 ![Panel](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/panel.jpg)
+
+
+![Administrador 2](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/Capturas_APP_VACUNACION/administrador-2.jpg)
+
+![Administrador 3](https://raw.githubusercontent.com/NicolasCh25/prueba3/main/Capturas_APP_VACUNACION/Capturas_APP_VACUNACION/administrador3.jpg)
+
+
 
 ---
 
